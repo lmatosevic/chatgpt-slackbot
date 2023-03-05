@@ -86,8 +86,11 @@ def handle_prompt(prompt, channel):
     if prompt.lower().startswith('image:'):
         # Generate DALL-E image command based on the prompt
         image_prompt = prompt[6:]
-        response = openai.Image.create(prompt=image_prompt, n=1, size=image_size)
-        text = response.data[0].url
+        if len(image_prompt) == 0:
+            text = 'Please check your input. To generate image use this format -> image: robot walking a dog'
+        else:
+            response = openai.Image.create(prompt=image_prompt, n=1, size=image_size)
+            text = response.data[0].url
     else:
         # Generate chat response
         now = datetime.now()
