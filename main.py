@@ -70,7 +70,7 @@ def handle_message_events(body):
 
 def handle_prompt(prompt, channel):
     # Log requested prompt
-    log('Received direct message: ' + prompt)
+    log(f'Channel {channel} received message: ' + prompt)
 
     # Let the user know that we are busy with the request 
     client.chat_postMessage(channel=channel,
