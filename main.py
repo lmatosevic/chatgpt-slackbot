@@ -23,7 +23,7 @@ def get_env(key: str, default: Optional[str]) -> str:
 
 def log(content: str):
     now = datetime.now()
-    print(f'[{now.isoformat()}] {content}')
+    print(f'[{now.isoformat()}] {content}', flush=True)
 
 
 # Load environment variables
