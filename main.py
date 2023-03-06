@@ -77,7 +77,7 @@ def handle_message_events(body):
 
 def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
     # Log requested prompt
-    log(f'Channel {channel} received message: ' + prompt)
+    log(f'Channel {channel} received message: {prompt}')
 
     # Initialize the last request datetime for this channel
     if channel not in last_request_datetime:
@@ -96,14 +96,27 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
     # Set current timestamp
     last_request_datetime[channel] = datetime.now()
 
+    # Read parent message content if called inside thread conversation
+    parent_message_text = None
+    if thread_ts and not direct_message:
+        conversation = client.conversations_replies(channel=channel, ts=thread_ts)
+        if len(conversation['messages']) > 0 and valid_input(conversation['messages'][0]['text']):
+            parent_message_text = conversation['messages'][0]['text']
+
     # Handle empty prompt
-    if len(prompt.strip()) == 0:
+    if len(prompt.strip()) == 0 and parent_message_text is None:
         log('Empty prompt received')
         return
 
     if prompt.lower().startswith('image:'):
         # Generate DALL-E image command based on the prompt
         image_prompt = prompt[6:].strip()
+
+        # Append parent message text as prefix if exists
+        if parent_message_text:
+            image_prompt = f'{parent_message_text}. {image_prompt}'
+            log('Using parent message inside thread')
+
         if len(image_prompt) == 0:
             text = 'Please check your input. To generate image use this format -> image: robot walking a dog'
         else:
@@ -153,11 +166,19 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         history_messages = []
         if channel in chat_history:
             for channel_message in chat_history[channel]:
-                if channel_message['created_at'] + timedelta(seconds=history_expires_seconds) < now:
+                if channel_message['created_at'] + timedelta(seconds=history_expires_seconds) < now or \
+                        channel_message['thread_ts'] != thread_ts or parent_message_text == channel_message['content']:
                     continue
                 history_messages.append({'role': channel_message['role'], 'content': channel_message['content']})
         else:
             chat_history[channel] = []
+
+        # Append parent text message if not already in history
+        if parent_message_text:
+            history_messages.append({'role': 'user', 'content': parent_message_text})
+
+        # Log used messages count
+        log(f'Using {len(history_messages)} messages from chat history')
 
         # Combine messages from system, history and current prompt
         messages = [
@@ -173,16 +194,21 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         text = response.choices[0].message.content.strip('\n')
 
         # Add messages to history
-        chat_history[channel].append({'role': 'user', 'content': prompt, 'created_at': now})
-        chat_history[channel].append({'role': 'assistant', 'content': text, 'created_at': datetime.now()})
-        if len(chat_history[channel]) > 4:
-            chat_history[channel].pop(0)
+        chat_history[channel].append({'role': 'user', 'content': prompt, 'created_at': now, 'thread_ts': thread_ts})
+        chat_history[channel].append(
+            {'role': 'assistant', 'content': text, 'created_at': datetime.now(), 'thread_ts': thread_ts})
+
+        # Remove the oldest history message if there are more than 4 messages in channel history for current thread
+        if len(list(filter(lambda x: x['thread_ts'] == thread_ts, chat_history[channel]))) > 4:
+            first_occurance = next(msg for msg in chat_history[channel] if msg['thread_ts'] == thread_ts)
+            if first_occurance:
+                chat_history[channel].remove(first_occurance)
 
         # Reply answer to thread
         client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=text)
 
     # Log response text
-    log('ChatGPT response: ' + str(text))
+    log(f'ChatGPT response: {text}')
 
 
 if __name__ == '__main__':

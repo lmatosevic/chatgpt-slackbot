@@ -18,7 +18,9 @@ These are required permissions for your Slack App:
 * chat:write
 * files:read
 * files:write
+* groups:history
 * im:history
+* mpim:history
 
 ### Slack events
 
