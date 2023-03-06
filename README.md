@@ -8,6 +8,16 @@
 * Slack app and bot tokens
 * OpenAI account and valid API key
 
+### OpenAI
+
+In order to generate OpenAI API key, you will first need to register and create an API key (if you haven't done already)
+on the [official OpenAI website](https://platform.openai.com/account/api-keys).
+
+### Slack
+
+You can find more information how to create and configure Slack app, events, permissions and generate tokens on
+the [official Slack documentation](https://api.slack.com/authentication/basics).
+
 ### Slack permissions
 
 These are required permissions for your Slack App:
