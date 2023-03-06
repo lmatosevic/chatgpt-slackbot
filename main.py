@@ -135,4 +135,7 @@ def handle_prompt(prompt, channel):
 
 
 if __name__ == '__main__':
-    SocketModeHandler(app, SLACK_APP_TOKEN).start()
+    try:
+        SocketModeHandler(app, SLACK_APP_TOKEN).start()
+    except KeyboardInterrupt:
+        print('Stopping server')
