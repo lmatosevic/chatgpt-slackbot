@@ -41,7 +41,7 @@ These are required events for your Slack App:
 
 ## Configuration
 
-All configurable environment variables for ChatGPT can be found in [.env.example](.env.example) file:
+All configurable environment variables can be found in [.env.example](.env.example) file:
 
 | Variable name      | Description                                                                        | Default value                                              |
 |--------------------|------------------------------------------------------------------------------------|------------------------------------------------------------|
