@@ -117,8 +117,9 @@ def handle_prompt(prompt, channel):
                 # Set text vairable for logging purposes only
                 text = upload_response['file']['url_private']
             except SlackApiError:
-                text = image_url
+                # Send image URL as a message
                 client.chat_postMessage(channel=channel, text=image_url)
+                text = image_url
 
             # Remove temp image
             if os.path.exists(image_path):
