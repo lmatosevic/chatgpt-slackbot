@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 from datetime import datetime, timedelta
 from typing import Optional
 from urllib.request import urlopen
@@ -23,9 +24,9 @@ def get_env(key: str, default: Optional[str]) -> str:
     return value
 
 
-def log(content: str):
+def log(content: str, error: bool = False):
     now = datetime.now()
-    print(f'[{now.isoformat()}] {content}', flush=True)
+    print(f'[{now.isoformat()}] {content}', flush=True, file=sys.stderr if error else sys.stdout)
 
 
 # Load environment variables
@@ -66,10 +67,10 @@ def handle_mention_events(body):
 def handle_message_events(body):
     prompt = str(body['event']['text']).strip()
     user = body['event']['user']
-    handle_prompt(prompt, user)
+    handle_prompt(prompt, user, True)
 
 
-def handle_prompt(prompt, channel):
+def handle_prompt(prompt, channel, direct_message=False):
     # Log requested prompt
     log(f'Channel {channel} received message: ' + prompt)
 
@@ -105,21 +106,25 @@ def handle_prompt(prompt, channel):
             image_file.write(image_content)
             image_file.close()
 
-            # Upload image to Slack and send response message to channel
-            try:
-                upload_response = client.files_upload_v2(
-                    channel=channel,
-                    title=image_prompt,
-                    filename=image_name,
-                    file=image_path
-                )
-
-                # Set text vairable for logging purposes only
-                text = upload_response['file']['url_private']
-            except SlackApiError:
+            if direct_message:
                 # Send image URL as a message
                 client.chat_postMessage(channel=channel, text=image_url)
                 text = image_url
+            else:
+                try:
+                    # Upload image to Slack and send message with image to channel
+                    upload_response = client.files_upload_v2(
+                        channel=channel,
+                        title=image_prompt,
+                        filename=image_name,
+                        file=image_path
+                    )
+
+                    # Set text vairable for logging purposes only
+                    text = upload_response['file']['url_private']
+                except SlackApiError as e:
+                    text = None
+                    log(f'Error from Slack API: {e}', True)
 
             # Remove temp image
             if os.path.exists(image_path):
@@ -137,9 +142,6 @@ def handle_prompt(prompt, channel):
                 history_messages.append({'role': channel_message['role'], 'content': channel_message['content']})
         else:
             chat_history[channel] = []
-
-        # Log history messages count
-        log(f'Using {str(len(history_messages))} history messages')
 
         # Combine messages from system, history and current prompt
         messages = [
@@ -164,7 +166,7 @@ def handle_prompt(prompt, channel):
         client.chat_postMessage(channel=channel, text=text)
 
     # Log response text
-    log('ChatGPT response: ' + text)
+    log('ChatGPT response: ' + str(text))
 
 
 if __name__ == '__main__':
