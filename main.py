@@ -54,7 +54,7 @@ history_expires_seconds = int(get_env('HISTORY_EXPIRES_IN', '900'))  # 15 minute
 # Activated when the bot is tagged in a channel
 @app.event('app_mention')
 def handle_mention_events(body):
-    prompt = str(str(body['event']['text']).split('>')[1])
+    prompt = str(str(body['event']['text']).split('>')[1]).strip()
     channel = body['event']['channel']
     handle_prompt(prompt, channel)
 
@@ -62,7 +62,7 @@ def handle_mention_events(body):
 # Activated when bot receives direct message
 @app.event('message')
 def handle_message_events(body):
-    prompt = str(body['event']['text'])
+    prompt = str(body['event']['text']).strip()
     user = body['event']['user']
     handle_prompt(prompt, user)
 
