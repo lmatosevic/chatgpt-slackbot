@@ -2,6 +2,7 @@ import os
 import random
 from datetime import datetime, timedelta
 from typing import Optional
+from urllib.request import urlopen
 
 import openai
 from dotenv import load_dotenv
@@ -76,7 +77,7 @@ def handle_prompt(prompt, channel):
                             text=random.choice([
                                 'Generating... :gear:',
                                 'Multiplying matrices :abacus:',
-                                'I\'m on it :saluting_face:',
+                                'Yessir :saluting_face:',
                                 'Beep beep boop :robot_face:',
                                 'Death to the machines! :skull:',
                                 'Anything for you :unicorn_face:',
@@ -85,12 +86,38 @@ def handle_prompt(prompt, channel):
 
     if prompt.lower().startswith('image:'):
         # Generate DALL-E image command based on the prompt
-        image_prompt = prompt[6:]
+        image_prompt = prompt[6:].strip()
         if len(image_prompt) == 0:
             text = 'Please check your input. To generate image use this format -> image: robot walking a dog'
         else:
             response = openai.Image.create(prompt=image_prompt, n=1, size=image_size)
-            text = response.data[0].url
+            image_url = response.data[0].url
+
+            # Read image from URL
+            image_content = urlopen(image_url).read()
+
+            image_name = f'{image_prompt}.png'
+            image_path = f'./tmp/{image_name}'
+
+            # Write file in temp directory
+            image_file = open(image_path, 'wb')
+            image_file.write(image_content)
+            image_file.close()
+
+            # Upload image to Slack and send response message to channel
+            upload_response = client.files_upload_v2(
+                channel=channel,
+                title=image_prompt,
+                filename=image_name,
+                file=image_path
+            )
+
+            # Remove temp image
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
+            # Set text vairable for logging purposes only
+            text = upload_response['file']['url_private']
     else:
         # Generate chat response
         now = datetime.now()
@@ -127,8 +154,8 @@ def handle_prompt(prompt, channel):
         if len(chat_history[channel]) > 4:
             chat_history[channel].pop(0)
 
-    # Reply to thread
-    client.chat_postMessage(channel=channel, text=text)
+        # Reply answer to thread
+        client.chat_postMessage(channel=channel, text=text)
 
     # Log response text
     log('ChatGPT response: ' + text)
