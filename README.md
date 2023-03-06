@@ -55,9 +55,24 @@ All configurable environment variables can be found in [.env.example](.env.examp
 
 ## Install & start
 
-```sh
-pip install -r requirements.txt
+First you should copy .env.example file into new .env file, and fill Slack tokens and OpenAI API key.
 
+(optional) You should create a new python virtual environment for this project. Run following command from the root
+of this project using python version 3.8 or greater:
+
+```shell
+python -m venv ./.venv
+```
+
+Then you can install python requirements by running following command:
+
+```shell
+pip install -r requirements.txt
+```
+
+Finally, you can start the Slack chatbot service:
+
+```shell
 python main.py
 ```
 
