@@ -173,12 +173,13 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         else:
             chat_history[channel] = []
 
-        # Append parent text message if not already in history
+        # Log used history messages count
+        log(f'Using {len(history_messages)} messages from chat history')
+
+        # Append parent text message from current thread
         if parent_message_text:
             history_messages.append({'role': 'user', 'content': parent_message_text})
-
-        # Log used messages count
-        log(f'Using {len(history_messages)} messages from chat history')
+            log(f'Adding parent message from thread with timestamp: {thread_ts}')
 
         # Combine messages from system, history and current prompt
         messages = [
