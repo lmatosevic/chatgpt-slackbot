@@ -63,7 +63,7 @@ def handle_mention_events(body):
     prompt = str(str(body['event']['text']).split('>')[1]).strip()
     channel = body['event']['channel']
     thread_ts = body['event']['thread_ts'] if 'thread_ts' in body['event'] else None
-    handle_prompt(prompt, thread_ts, channel)
+    handle_prompt(prompt, channel, thread_ts)
 
 
 # Activated when bot receives direct message
