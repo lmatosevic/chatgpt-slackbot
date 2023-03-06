@@ -181,12 +181,13 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
             history_messages.append({'role': 'user', 'content': parent_message_text})
             log(f'Adding parent message from thread with timestamp: {thread_ts}')
 
-        # Combine messages from system, history and current prompt
+        # Combine messages from history, current prompt and system if not disabled
         messages = [
-            {'role': 'system', 'content': system_desc},
             *history_messages,
             {'role': 'user', 'content': prompt}
         ]
+        if system_desc.lower() != 'none':
+            messages.insert(0, {'role': 'system', 'content': system_desc})
 
         # Send request to ChatGPT
         response = openai.ChatCompletion.create(model=model, messages=messages)

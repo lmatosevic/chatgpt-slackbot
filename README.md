@@ -33,15 +33,15 @@ These are required events for your Slack App:
 
 All configurable environment variables for ChatGPT can be found in [.env.example](.env.example) file:
 
-| Variable name      | Description                                                                    | Default value                                              |
-|--------------------|--------------------------------------------------------------------------------|------------------------------------------------------------|
-| SLACK_BOT_TOKEN    | Slack Bot token used to send messages and listen to events (starts with xoxb-) | -                                                          |
-| SLACK_APP_TOKEN    | Slack App token used to interact with your workspace (starts with xapp-)       | -                                                          |
-| OPENAI_API_KEY     | OpenAI API key used to send request (starts with sk-)                          | -                                                          |
-| GPT_MODEL          | GPT model used for chat completion                                             | gpt-3.5-turbo                                              |
-| GPT_SYSTEM_DESC    | The description for the system on how to best tailor answers                   | You are a very direct and straight-to-the-point assistant. |
-| GPT_IMAGE_SIZE     | The generated image size (256x256, 512x512 or 1024x1024)                       | 512x512                                                    |
-| HISTORY_EXPIRES_IN | Number of seconds to keep message history for the same channel as a context    | 900                                                        |
+| Variable name      | Description                                                                        | Default value                                              |
+|--------------------|------------------------------------------------------------------------------------|------------------------------------------------------------|
+| SLACK_BOT_TOKEN    | Slack Bot token used to send messages and listen to events (starts with xoxb-)     | -                                                          |
+| SLACK_APP_TOKEN    | Slack App token used to interact with your workspace (starts with xapp-)           | -                                                          |
+| OPENAI_API_KEY     | OpenAI API key used to send request (starts with sk-)                              | -                                                          |
+| GPT_MODEL          | GPT model used for chat completion                                                 | gpt-3.5-turbo                                              |
+| GPT_SYSTEM_DESC    | The description for the system on how to best tailor answers (disable with "None") | You are a very direct and straight-to-the-point assistant. |
+| GPT_IMAGE_SIZE     | The generated image size (256x256, 512x512 or 1024x1024)                           | 512x512                                                    |
+| HISTORY_EXPIRES_IN | Number of seconds to keep message history for the same channel as a context        | 900                                                        |
 
 ## Install & start
 
