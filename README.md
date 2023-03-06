@@ -60,19 +60,19 @@ First you should copy .env.example file into new .env file, and fill Slack token
 (optional) You should create a new python virtual environment for this project. Run following command from the root
 of this project using python version 3.8 or greater:
 
-```shell
+```sh
 python -m venv ./.venv
 ```
 
 Then you can install python requirements by running following command:
 
-```shell
+```sh
 pip install -r requirements.txt
 ```
 
 Finally, you can start the Slack chatbot service:
 
-```shell
+```sh
 python main.py
 ```
 
