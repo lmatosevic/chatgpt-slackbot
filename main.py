@@ -53,13 +53,17 @@ chat_history = {
 }
 history_expires_seconds = int(get_env('HISTORY_EXPIRES_IN', '900'))  # 15 minutes
 
+# Keep timestamps of last requests per channel
+last_request_datetime = {}
+
 
 # Activated when the bot is tagged in a channel
 @app.event('app_mention')
 def handle_mention_events(body):
     prompt = str(str(body['event']['text']).split('>')[1]).strip()
     channel = body['event']['channel']
-    handle_prompt(prompt, channel)
+    thread_ts = body['event']['thread_ts'] if 'thread_ts' in body['event'] else None
+    handle_prompt(prompt, thread_ts, channel)
 
 
 # Activated when bot receives direct message
@@ -67,24 +71,35 @@ def handle_mention_events(body):
 def handle_message_events(body):
     prompt = str(body['event']['text']).strip()
     user = body['event']['user']
-    handle_prompt(prompt, user, True)
+    thread_ts = body['event']['thread_ts'] if 'thread_ts' in body['event'] else None
+    handle_prompt(prompt, user, thread_ts, True)
 
 
-def handle_prompt(prompt, channel, direct_message=False):
+def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
     # Log requested prompt
     log(f'Channel {channel} received message: ' + prompt)
 
-    # Let the user know that we are busy with the request 
-    client.chat_postMessage(channel=channel,
-                            text=random.choice([
-                                'Generating... :gear:',
-                                'Multiplying matrices :abacus:',
-                                'Yessir :saluting_face:',
-                                'Beep beep boop :robot_face:',
-                                'Death to the machines! :skull:',
-                                'Anything for you :unicorn_face:',
-                                'Here you go :rainbow:'
-                            ]))
+    # Initialize the last request datetime for this channel
+    if channel not in last_request_datetime:
+        last_request_datetime[channel] = datetime.fromtimestamp(0)
+
+    # Let the user know that we are busy with the request if enough time has passed since last message
+    if last_request_datetime[channel] + timedelta(seconds=history_expires_seconds) < datetime.now():
+        client.chat_postMessage(channel=channel,
+                                thread_ts=thread_ts,
+                                text=random.choice([
+                                    'Generating... :gear:',
+                                    'Multiplying matrices :abacus:',
+                                    'Beep beep boop :robot_face:'
+                                ]))
+
+    # Set current timestamp
+    last_request_datetime[channel] = datetime.now()
+
+    # Handle empty prompt
+    if len(prompt.strip()) == 0:
+        log('Empty prompt received')
+        return
 
     if prompt.lower().startswith('image:'):
         # Generate DALL-E image command based on the prompt
@@ -108,13 +123,14 @@ def handle_prompt(prompt, channel, direct_message=False):
 
             if direct_message:
                 # Send image URL as a message
-                client.chat_postMessage(channel=channel, text=image_url)
+                client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=image_url)
                 text = image_url
             else:
                 try:
                     # Upload image to Slack and send message with image to channel
                     upload_response = client.files_upload_v2(
                         channel=channel,
+                        thread_ts=thread_ts,
                         title=image_prompt,
                         filename=image_name,
                         file=image_path
@@ -163,7 +179,7 @@ def handle_prompt(prompt, channel, direct_message=False):
             chat_history[channel].pop(0)
 
         # Reply answer to thread
-        client.chat_postMessage(channel=channel, text=text)
+        client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=text)
 
     # Log response text
     log('ChatGPT response: ' + str(text))
