@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
 
 def valid_input(value: Optional[str]) -> bool:
@@ -105,19 +106,23 @@ def handle_prompt(prompt, channel):
             image_file.close()
 
             # Upload image to Slack and send response message to channel
-            upload_response = client.files_upload_v2(
-                channel=channel,
-                title=image_prompt,
-                filename=image_name,
-                file=image_path
-            )
+            try:
+                upload_response = client.files_upload_v2(
+                    channel=channel,
+                    title=image_prompt,
+                    filename=image_name,
+                    file=image_path
+                )
+
+                # Set text vairable for logging purposes only
+                text = upload_response['file']['url_private']
+            except SlackApiError:
+                text = image_url
+                client.chat_postMessage(channel=channel, text=image_url)
 
             # Remove temp image
             if os.path.exists(image_path):
                 os.remove(image_path)
-
-            # Set text vairable for logging purposes only
-            text = upload_response['file']['url_private']
     else:
         # Generate chat response
         now = datetime.now()
