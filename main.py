@@ -7,6 +7,7 @@ from urllib.request import urlopen
 
 import openai
 from dotenv import load_dotenv
+from openai import InvalidRequestError
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
@@ -124,7 +125,14 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
             text = 'Please check your input. To generate image use this format -> image: robot walking a dog'
         else:
             # Generate image based on prompt text
-            response = openai.Image.create(prompt=image_prompt, n=1, size=image_size)
+            try:
+                response = openai.Image.create(prompt=image_prompt, n=1, size=image_size)
+            except InvalidRequestError as e:
+                log(f'ChatGPT image error: {e}', error=True)
+                # Reply with error message
+                client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=str(e))
+                return
+
             image_url = response.data[0].url
 
             if direct_message:
@@ -160,7 +168,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
                     text = upload_response['file']['url_private']
                 except SlackApiError as e:
                     text = None
-                    log(f'Error from Slack API: {e}', error=True)
+                    log(f'Slack API error: {e}', error=True)
 
                 # Remove temp image
                 if image_path and os.path.exists(image_path):
@@ -197,7 +205,13 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
             messages.insert(0, {'role': 'system', 'content': system_desc})
 
         # Send request to ChatGPT
-        response = openai.ChatCompletion.create(model=model, messages=messages)
+        try:
+            response = openai.ChatCompletion.create(model=model, messages=messages)
+        except InvalidRequestError as e:
+            log(f'ChatGPT response error: {e}', error=True)
+            # Reply with error message
+            client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=str(e))
+            return
 
         # Prepare response text
         text = response.choices[0].message.content.strip('\n')
