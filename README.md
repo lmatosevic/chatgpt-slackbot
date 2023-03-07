@@ -45,23 +45,35 @@ All configurable environment variables can be found in [.env.example](.env.examp
 
 | Variable name      | Description                                                                        | Default value                                              |
 |--------------------|------------------------------------------------------------------------------------|------------------------------------------------------------|
-| SLACK_BOT_TOKEN    | Slack Bot token used to send messages and listen to events (starts with xoxb-)     | -                                                          |
-| SLACK_APP_TOKEN    | Slack App token used to interact with your workspace (starts with xapp-)           | -                                                          |
-| OPENAI_API_KEY     | OpenAI API key used to send request (starts with sk-)                              | -                                                          |
+| *SLACK_BOT_TOKEN   | Slack Bot token used to send messages and listen to events (starts with xoxb-)     | -                                                          |
+| *SLACK_APP_TOKEN   | Slack App token used to interact with your workspace (starts with xapp-)           | -                                                          |
+| *OPENAI_API_KEY    | OpenAI API key used to send request (starts with sk-)                              | -                                                          |
 | GPT_MODEL          | GPT model used for chat completion                                                 | gpt-3.5-turbo                                              |
 | GPT_SYSTEM_DESC    | The description for the system on how to best tailor answers (disable with "None") | You are a very direct and straight-to-the-point assistant. |
 | GPT_IMAGE_SIZE     | The generated image size (256x256, 512x512 or 1024x1024)                           | 512x512                                                    |
 | HISTORY_EXPIRES_IN | Number of seconds to keep message history for the same channel as a context        | 900                                                        |
 
+_Variables with * prefix are mandatory for running this service_
+
 ## Install & start
 
-First you should copy .env.example file into new .env file, and fill Slack tokens and OpenAI API key.
+First you should copy [.env.example](.env.example) file into new .env file, and fill Slack tokens and OpenAI API key.
 
 (optional) You should create a new python virtual environment for this project. Run following command from the root
 of this project using python version 3.8 or greater:
 
 ```sh
 python -m venv ./.venv
+```
+
+Activate virtual environment by running following scripts:
+
+```sh
+# linux
+./.venv/bin/activate
+
+# windows
+./.venv/Scripts/activate
 ```
 
 Then you can install python requirements by running following command:
@@ -74,6 +86,28 @@ Finally, you can start the Slack chatbot service:
 
 ```sh
 python main.py
+```
+
+## Docker support
+
+This service has full docker support with provided [Dockerfile](Dockerfile).
+
+First, you should build image with fullowing docker command:
+
+```sh
+docker image build -rm -t chatgpt-slackbot .
+```
+
+Then you can start the chatbot service with:
+
+```sh
+# provide .env file with configured tokens and api key
+docker run --env-file .env chatgpt-slackbot
+
+# also, you can set environment variables as parameters
+docker run --env "SLACK_BOT_TOKEN=xoxb-..." \
+           --env "SLACK_APP_TOKEN=xapp-..." \
+           --env "OPENAI_API_KEY=sk-..." chatgpt-slackbot
 ```
 
 ## License
