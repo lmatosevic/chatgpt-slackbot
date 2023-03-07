@@ -113,7 +113,7 @@ Then you can start the chatbot service with any of the commands:
 # provide .env file with configured tokens and api key
 docker run --env-file .env chatgpt-slackbot
 
-# also, you can set environment variables as parameters
+# also, you can set required environment variables as parameters
 docker run --env "SLACK_BOT_TOKEN=xoxb-..." \
            --env "SLACK_APP_TOKEN=xapp-..." \
            --env "OPENAI_API_KEY=sk-..." chatgpt-slackbot
