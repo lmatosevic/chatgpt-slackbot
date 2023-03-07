@@ -104,7 +104,7 @@ docker run --env-file .env lukamatosevic/chatgpt-slackbot
 Or, you can build the image yourself with the following docker command:
 
 ```sh
-docker image build -rm -t chatgpt-slackbot .
+docker image build --rm -t chatgpt-slackbot .
 ```
 
 Then you can start the chatbot service with any of the commands:
