@@ -1,6 +1,6 @@
 # ChatGPT Slack integration
 
-> ChatGPT API and Slack bot integration service
+> Slack bot service with ChatGPT API integration
 
 ## Requirements
 
@@ -90,15 +90,24 @@ python main.py
 
 ## Docker support
 
-This service has full docker support with provided [Dockerfile](Dockerfile).
+This service has full docker support with provided by [Dockerfile](Dockerfile).
 
-First, you should build image with following docker command:
+The easiest way to pull & start docker image is to use already built public image
+from [official DockerHub repository](https://hub.docker.com/repository/docker/lukamatosevic/chatgpt-slackbot):
+
+```sh
+docker pull lukamatosevic/chatgpt-slackbot
+
+docker run --env-file .env lukamatosevic/chatgpt-slackbot
+```
+
+Or, you can build the image yourself with the following docker command:
 
 ```sh
 docker image build -rm -t chatgpt-slackbot .
 ```
 
-Then you can start the chatbot service with:
+Then you can start the chatbot service with any of the commands:
 
 ```sh
 # provide .env file with configured tokens and api key

@@ -12,6 +12,8 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
+from _version import __version__
+
 
 def valid_input(value: Optional[str]) -> bool:
     return value is not None and value.strip() != ''
@@ -215,6 +217,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
 
 if __name__ == '__main__':
     try:
+        print(f'ChatGPT Slackbot version {__version__}')
         SocketModeHandler(app, SLACK_APP_TOKEN).start()
     except KeyboardInterrupt:
-        print('Stopping server')
+        log('Stopping server')
