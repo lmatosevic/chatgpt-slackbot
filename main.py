@@ -151,7 +151,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
                     upload_response = client.files_upload_v2(
                         channel=channel,
                         thread_ts=thread_ts,
-                        title=image_prompt,
+                        title=short_prompt,
                         filename=image_name,
                         file=image_path
                     )
