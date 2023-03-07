@@ -92,7 +92,7 @@ python main.py
 
 This service has full docker support with provided [Dockerfile](Dockerfile).
 
-First, you should build image with fullowing docker command:
+First, you should build image with following docker command:
 
 ```sh
 docker image build -rm -t chatgpt-slackbot .
