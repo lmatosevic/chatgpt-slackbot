@@ -112,7 +112,8 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
 
     if prompt.lower().startswith('image:'):
         # Generate DALL-E image command based on the prompt
-        image_prompt = prompt[6:].strip()
+        base_image_prompt = prompt[6:].strip()
+        image_prompt = base_image_prompt
 
         # Append parent message text as prefix if exists
         if parent_message_text:
@@ -122,26 +123,30 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         if len(image_prompt) == 0:
             text = 'Please check your input. To generate image use this format -> image: robot walking a dog'
         else:
+            # Generate image based on prompt text
             response = openai.Image.create(prompt=image_prompt, n=1, size=image_size)
             image_url = response.data[0].url
-
-            # Read image from URL
-            image_content = urlopen(image_url).read()
-
-            image_name = f'{image_prompt}.png'
-            image_path = f'./tmp/{image_name}'
-
-            # Write file in temp directory
-            image_file = open(image_path, 'wb')
-            image_file.write(image_content)
-            image_file.close()
 
             if direct_message:
                 # Send image URL as a message
                 client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=image_url)
                 text = image_url
             else:
+                image_path = None
                 try:
+                    # Read image from URL
+                    image_content = urlopen(image_url).read()
+
+                    # Prepare image name and path
+                    short_prompt = base_image_prompt if valid_input(base_image_prompt) else image_prompt[:30].strip()
+                    image_name = f"{short_prompt.replace(' ', '_')}.png"
+                    image_path = f'./tmp/{image_name}'
+
+                    # Write file in temp directory
+                    image_file = open(image_path, 'wb')
+                    image_file.write(image_content)
+                    image_file.close()
+
                     # Upload image to Slack and send message with image to channel
                     upload_response = client.files_upload_v2(
                         channel=channel,
@@ -155,11 +160,11 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
                     text = upload_response['file']['url_private']
                 except SlackApiError as e:
                     text = None
-                    log(f'Error from Slack API: {e}', True)
+                    log(f'Error from Slack API: {e}', error=True)
 
-            # Remove temp image
-            if os.path.exists(image_path):
-                os.remove(image_path)
+                # Remove temp image
+                if image_path and os.path.exists(image_path):
+                    os.remove(image_path)
     else:
         # Generate chat response
         now = datetime.now()
