@@ -68,13 +68,13 @@ def handle_mention_events(body):
     handle_prompt(prompt, channel, thread_ts)
 
 
-# Activated when bot receives direct message
+# Activated when the bot receives a direct message
 @app.event('message')
 def handle_message_events(body):
     prompt = str(body['event']['text']).strip()
     user = body['event']['user']
     thread_ts = body['event']['thread_ts'] if 'thread_ts' in body['event'] else None
-    handle_prompt(prompt, user, thread_ts, True)
+    handle_prompt(prompt, user, thread_ts, direct_message=True)
 
 
 def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
