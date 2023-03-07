@@ -1,6 +1,6 @@
 # ChatGPT Slack integration
 
-> > Slack bot service for seamless ChatGPT integration
+> Slack bot service for seamless ChatGPT integration
 
 ## Requirements
 
