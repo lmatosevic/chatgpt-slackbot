@@ -221,11 +221,20 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         chat_history[channel].append(
             {'role': 'assistant', 'content': text, 'created_at': datetime.now(), 'thread_ts': thread_ts})
 
-        # Remove the oldest history message if there are more than 4 messages in channel history for current thread
-        if len(list(filter(lambda x: x['thread_ts'] == thread_ts, chat_history[channel]))) > 4:
-            first_occurance = next(msg for msg in chat_history[channel] if msg['thread_ts'] == thread_ts)
+        # Remove the oldest 2 history message if there are 8 messages in channel history for the current thread
+        if len(list(filter(lambda x: x['thread_ts'] == thread_ts, chat_history[channel]))) >= 8:
+            # Create iterator for chat history list
+            chat_history_list = (msg for msg in chat_history[channel] if msg['thread_ts'] == thread_ts)
+            first_occurance = next(chat_history_list, None)
+            second_occurance = next(chat_history_list, None)
+
+            # Remove first occurance
             if first_occurance:
                 chat_history[channel].remove(first_occurance)
+
+            # Remove second occurance
+            if second_occurance:
+                chat_history[channel].remove(second_occurance)
 
         # Reply answer to thread
         client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=text)
