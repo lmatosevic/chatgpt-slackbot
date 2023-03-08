@@ -1,7 +1,5 @@
 import os
 
-verstrline = open(f'{os.getcwd()}/_version.py', "rt").readline()
-version = verstrline.split('=')[-1].strip().replace('\'', '')
+from _info import __version__, __name__, __registry__
 
-os.system(
-    f'docker image build --rm -t lukamatosevic/chatgpt-slackbot:{version} -t lukamatosevic/chatgpt-slackbot:latest .')
+os.system(f'docker image build --rm -t {__registry__}/{__name__}:{__version__} -t {__registry__}/{__name__}:latest .')

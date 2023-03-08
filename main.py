@@ -13,7 +13,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-from _version import __version__
+from _info import __version__
 
 
 def valid_input(value: Optional[str]) -> bool:

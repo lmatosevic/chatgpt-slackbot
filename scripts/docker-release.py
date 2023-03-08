@@ -1,7 +1,6 @@
 import os
 
-verstrline = open(f'{os.getcwd()}/_version.py', "rt").readline()
-version = verstrline.split('=')[-1].strip().replace('\'', '')
+from _info import __version__, __name__, __registry__
 
-os.system(f'docker push lukamatosevic/chatgpt-slackbot:{version}')
-os.system('docker push lukamatosevic/chatgpt-slackbot:latest')
+os.system(f'docker push {__registry__}/{__name__}:{__version__}')
+os.system(f'docker push {__registry__}/{__name__}:latest')
