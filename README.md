@@ -96,7 +96,7 @@ The easiest way to pull & start docker image is to use already built public imag
 from [official DockerHub repository](https://hub.docker.com/repository/docker/lukamatosevic/chatgpt-slackbot):
 
 ```sh
-docker pull lukamatosevic/chatgpt-slackbot
+docker pull lukamatosevic/chatgpt-slackbot:latest
 
 docker run --env-file .env lukamatosevic/chatgpt-slackbot
 ```
