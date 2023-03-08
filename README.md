@@ -66,7 +66,7 @@ of this project using python version 3.8 or greater:
 python -m venv ./.venv
 ```
 
-Activate virtual environment by running following scripts:
+Activate virtual environment by running one of the following scripts:
 
 ```sh
 # linux
@@ -92,7 +92,7 @@ python main.py
 
 This service has full docker support with provided by [Dockerfile](Dockerfile).
 
-The easiest way to pull & start docker image is to use already built public image
+The easiest way to pull & run docker image is to use already built public image
 from [official DockerHub repository](https://hub.docker.com/repository/docker/lukamatosevic/chatgpt-slackbot):
 
 ```sh
@@ -101,13 +101,13 @@ docker pull lukamatosevic/chatgpt-slackbot:latest
 docker run --env-file .env lukamatosevic/chatgpt-slackbot
 ```
 
-Or, you can build the image yourself with the following docker command:
+Or, you can build the image yourself with docker command:
 
 ```sh
 docker image build --rm -t chatgpt-slackbot .
 ```
 
-Then you can start the chatbot service with any of the commands:
+Then you can start the chatbot service with any of the following commands:
 
 ```sh
 # provide .env file with configured tokens and api key
