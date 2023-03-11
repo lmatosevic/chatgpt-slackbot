@@ -55,6 +55,7 @@ chat_history = {
     'general': []
 }
 history_expires_seconds = int(get_env('HISTORY_EXPIRES_IN', '900'))  # 15 minutes
+history_size = int(get_env('HISTORY_SIZE', '3'))
 
 # Keep timestamps of last requests per channel
 last_request_datetime = {}
@@ -221,8 +222,8 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         chat_history[channel].append(
             {'role': 'assistant', 'content': text, 'created_at': datetime.now(), 'thread_ts': thread_ts})
 
-        # Remove the oldest 2 history message if there are 8 messages in channel history for the current thread
-        if len(list(filter(lambda x: x['thread_ts'] == thread_ts, chat_history[channel]))) >= 8:
+        # Remove the oldest 2 history message if the channel history size is exceeded for the current thread
+        if len(list(filter(lambda x: x['thread_ts'] == thread_ts, chat_history[channel]))) >= (history_size + 1) * 2:
             # Create iterator for chat history list
             chat_history_list = (msg for msg in chat_history[channel] if msg['thread_ts'] == thread_ts)
             first_occurance = next(chat_history_list, None)

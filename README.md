@@ -5,7 +5,7 @@
 ## Requirements
 
 * Python >= 3.8.0
-* Slack app and bot tokens
+* Slack App and Bot tokens
 * OpenAI account and valid API key
 
 ### OpenAI
@@ -52,6 +52,7 @@ All configurable environment variables can be found in [.env.example](.env.examp
 | GPT_SYSTEM_DESC    | The description for the system on how to best tailor answers (disable with "None") | You are a very direct and straight-to-the-point assistant. |
 | GPT_IMAGE_SIZE     | The generated image size (256x256, 512x512 or 1024x1024)                           | 512x512                                                    |
 | HISTORY_EXPIRES_IN | Number of seconds to keep message history for the same channel as a context        | 900                                                        |
+| HISTORY_SIZE       | Number of last messages to keep in hostory as a context for the next question      | 3                                                          |
 
 _Variables with * prefix are mandatory for running this service_
 
@@ -118,6 +119,13 @@ docker run --env "SLACK_BOT_TOKEN=xoxb-..." \
            --env "SLACK_APP_TOKEN=xapp-..." \
            --env "OPENAI_API_KEY=sk-..." chatgpt-slackbot
 ```
+
+## Recommendations
+
+### ChatGPT-Cli
+
+If you want to use the power of ChatGPT as a command-line tool, you should check out my other project which
+allows interaction with ChatGPT using terminal: https://github.com/lmatosevic/chatgpt-cli
 
 ## License
 
