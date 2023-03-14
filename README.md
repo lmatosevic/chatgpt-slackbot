@@ -52,7 +52,7 @@ All configurable environment variables can be found in [.env.example](.env.examp
 | GPT_SYSTEM_DESC    | The description for the system on how to best tailor answers (disable with "None") | You are a very direct and straight-to-the-point assistant. |
 | GPT_IMAGE_SIZE     | The generated image size (256x256, 512x512 or 1024x1024)                           | 512x512                                                    |
 | HISTORY_EXPIRES_IN | Number of seconds to keep message history for the same channel as a context        | 900                                                        |
-| HISTORY_SIZE       | Number of last messages to keep in hostory as a context for the next question      | 3                                                          |
+| HISTORY_SIZE       | Number of last messages to keep in history as a context for the next question      | 3                                                          |
 
 _Variables with * prefix are mandatory for running this service_
 
