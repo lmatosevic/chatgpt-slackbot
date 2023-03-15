@@ -120,6 +120,20 @@ docker run --env "SLACK_BOT_TOKEN=xoxb-..." \
            --env "OPENAI_API_KEY=sk-..." chatgpt-slackbot
 ```
 
+## Examples
+
+### Conversation
+
+![alt text](https://raw.githubusercontent.com/lmatosevic/chatgpt-slackbot/master/resources/chatgpt-slackbot-conversation.png)
+
+### Conversation in thread
+
+![alt text](https://raw.githubusercontent.com/lmatosevic/chatgpt-slackbot/master/resources/chatgpt-slackbot-thread.png)
+
+### Generate images
+
+![alt text](https://raw.githubusercontent.com/lmatosevic/chatgpt-slackbot/master/resources/chatgpt-slackbot-image.png)
+
 ## Recommendations
 
 ### ChatGPT-Cli
