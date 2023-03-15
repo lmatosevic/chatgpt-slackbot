@@ -124,15 +124,15 @@ docker run --env "SLACK_BOT_TOKEN=xoxb-..." \
 
 ### Conversation
 
-![alt text](https://raw.githubusercontent.com/lmatosevic/chatgpt-slackbot/master/resources/chatgpt-slackbot-conversation.png)
+![alt text](https://github.com/lmatosevic/chatgpt-slackbot/blob/main/resources/chatgpt-slackbot-conversation.png?raw=true)
 
 ### Conversation in thread
 
-![alt text](https://raw.githubusercontent.com/lmatosevic/chatgpt-slackbot/master/resources/chatgpt-slackbot-thread.png)
+![alt text](https://github.com/lmatosevic/chatgpt-slackbot/blob/main/resources/chatgpt-slackbot-thread.png?raw=true)
 
 ### Generate images
 
-![alt text](https://raw.githubusercontent.com/lmatosevic/chatgpt-slackbot/master/resources/chatgpt-slackbot-image.png)
+![alt text](https://github.com/lmatosevic/chatgpt-slackbot/blob/main/resources/chatgpt-slackbot-image.png?raw=true)
 
 ## Recommendations
 
