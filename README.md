@@ -124,13 +124,25 @@ docker run --env "SLACK_BOT_TOKEN=xoxb-..." \
 
 ### Conversation
 
+This example shows a conversation with ChatGPT Slack app. You can start conversation directly with ChatGPT or you can
+add it to any channel or group conversation. If you are speaking to the ChatGPT directly, you don't need to mention
+it by **@ChatGPT**.
+
+The conversation will keep a specified number of messages in history (default: 3) for some time (default: 15 minutes)
+which are used as context when ChatGPT is generating new responses in the same thread and channel / private chat.
+
 ![alt text](https://github.com/lmatosevic/chatgpt-slackbot/blob/main/resources/chatgpt-slackbot-conversation.png?raw=true)
 
 ### Conversation in thread
 
+Here is shown the possible use case for asking ChatGPT to answer or do something with the parent message in a thread.
+
 ![alt text](https://github.com/lmatosevic/chatgpt-slackbot/blob/main/resources/chatgpt-slackbot-thread.png?raw=true)
 
 ### Generate images
+
+You can also ask ChatGPT to generate images by starting the message with `image:` prefix. You can also use this in a
+thread where the parent message will be added to the context when prompting the DALL-E 2 OpenAI API endpoint.
 
 ![alt text](https://github.com/lmatosevic/chatgpt-slackbot/blob/main/resources/chatgpt-slackbot-image.png?raw=true)
 
