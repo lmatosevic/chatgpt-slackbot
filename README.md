@@ -124,12 +124,13 @@ docker run --env "SLACK_BOT_TOKEN=xoxb-..." \
 
 ### Conversation
 
-This example shows a conversation with ChatGPT Slack app. You can start conversation directly with ChatGPT or you can
-add it to any channel or group conversation. If you are speaking to the ChatGPT directly, you don't need to mention
-it by **@ChatGPT**.
+This example shows a conversation with ChatGPT Slack app. You can start conversation directly with ChatGPT by sending it
+a private message, or you can add it to any channel or group conversation. If you are speaking to the ChatGPT directly,
+you don't need to mention it by **@ChatGPT**.
 
 The conversation will keep a specified number of messages in history (default: 3) for some time (default: 15 minutes)
-which are used as context when ChatGPT is generating new responses in the same thread and channel / private chat.
+which are used as context when ChatGPT is generating new responses in the same thread and channel / private / group
+chat.
 
 ![alt text](https://github.com/lmatosevic/chatgpt-slackbot/blob/main/resources/chatgpt-slackbot-conversation.png?raw=true)
 
