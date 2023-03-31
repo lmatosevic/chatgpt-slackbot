@@ -1,5 +1,9 @@
 # ChatGPT Slack integration
 
+![docker](https://img.shields.io/docker/v/lukamatosevic/chatgpt-slackbot)
+![License](https://img.shields.io/github/license/lmatosevic/chatgpt-slackbot)
+![build](https://img.shields.io/badge/build-passing-brightgreen)
+
 > Slack bot service for seamless ChatGPT integration
 
 ## Requirements
