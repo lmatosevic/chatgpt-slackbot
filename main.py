@@ -47,8 +47,9 @@ openai.api_key = OPENAI_API_KEY
 
 # ChatGPT configuration
 model = get_env('GPT_MODEL', 'gpt-3.5-turbo')
+image_model = get_env('GPT_IMAGE_MODEL', 'dall-e-2')
 system_desc = get_env('GPT_SYSTEM_DESC', 'You are a very direct and straight-to-the-point assistant.')
-image_size = get_env('GPT_IMAGE_SIZE', '512x512')
+image_size = get_env('GPT_IMAGE_SIZE', '1024x1024')
 
 # Keep chat history to provide context for furute prompts
 chat_history = {
@@ -127,7 +128,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         else:
             # Generate image based on prompt text
             try:
-                response = openai.Image.create(prompt=image_prompt, n=1, size=image_size)
+                response = openai.Image.create(model=image_model, prompt=image_prompt, n=1, size=image_size)
             except InvalidRequestError as e:
                 log(f'ChatGPT image error: {e}', error=True)
                 # Reply with error message
