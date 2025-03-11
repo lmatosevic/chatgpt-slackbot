@@ -17,10 +17,31 @@ from _info import __version__
 
 
 def valid_input(value: Optional[str]) -> bool:
+    """
+    Checks if the provided input value is valid.
+
+    A value is considered valid if it is not None and not just whitespace.
+
+    Args:
+        value (Optional[str]): The input value to check.
+
+    Returns:
+        bool: True if the input is valid; False otherwise.
+    """
     return value is not None and value.strip() != ''
 
 
 def get_env(key: str, default: Optional[str]) -> str:
+    """
+    Retrieves an environment variable, returning a default value if not found or invalid.
+
+    Args:
+        key (str): The name of the environment variable to retrieve.
+        default (Optional[str]): The default value to return if the variable doesn't exist or is invalid.
+
+    Returns:
+        str: The value of the environment variable or the default value.
+    """
     value = os.getenv(key, default)
     if not valid_input(value):
         value = default
@@ -28,6 +49,13 @@ def get_env(key: str, default: Optional[str]) -> str:
 
 
 def log(content: str, error: bool = False):
+    """
+    Logs a message to the console with a timestamp.
+
+    Args:
+        content (str): The content to log.
+        error (bool): If True, log to stderr; otherwise, log to stdout.
+    """
     now = datetime.now()
     print(f'[{now.isoformat()}] {content}', flush=True, file=sys.stderr if error else sys.stdout)
 
@@ -51,7 +79,7 @@ image_model = get_env('GPT_IMAGE_MODEL', 'dall-e-2')
 system_desc = get_env('GPT_SYSTEM_DESC', 'You are a very direct and straight-to-the-point assistant.')
 image_size = get_env('GPT_IMAGE_SIZE', '1024x1024')
 
-# Keep chat history to provide context for furute prompts
+# Keep chat history to provide context for future prompts
 chat_history = {
     'general': []
 }
@@ -65,6 +93,14 @@ last_request_datetime = {}
 # Activated when the bot is tagged in a channel
 @app.event('app_mention')
 def handle_mention_events(body):
+    """
+    Handles events when the bot is mentioned in a channel.
+
+    This function extracts the prompt from the event and passes it to the handle_prompt function.
+
+    Args:
+        body (dict): The event body containing the mention information.
+    """
     prompt = str(str(body['event']['text']).split('>')[1]).strip()
     channel = body['event']['channel']
     thread_ts = body['event']['thread_ts'] if 'thread_ts' in body['event'] else None
@@ -74,6 +110,14 @@ def handle_mention_events(body):
 # Activated when the bot receives a direct message
 @app.event('message')
 def handle_message_events(body):
+    """
+    Handles events when the bot receives a direct message.
+
+    This function extracts the prompt from the event and passes it to the handle_prompt function.
+
+    Args:
+        body (dict): The event body containing the message information.
+    """
     prompt = str(body['event']['text']).strip()
     user = body['event']['user']
     thread_ts = body['event']['thread_ts'] if 'thread_ts' in body['event'] else None
@@ -81,6 +125,16 @@ def handle_message_events(body):
 
 
 def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
+    """
+    Processes the incoming prompt, determines if it requires an image generation or a chat response,
+    and logs the user request. Sends a response back to the Slack channel or direct message.
+
+    Args:
+        prompt (str): The prompt provided by the user.
+        channel (str): The channel ID where the prompt was received.
+        thread_ts (Optional[str]): The timestamp of the thread if applicable.
+        direct_message (bool): Indicates if the prompt was a direct message.
+    """
     # Log requested prompt
     log(f'Channel {channel} received message: {prompt}')
 
@@ -166,7 +220,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
                         file=image_path
                     )
 
-                    # Set text vairable for logging purposes only
+                    # Set text variable for logging purposes only
                     text = upload_response['file']['url_private']
                 except SlackApiError as e:
                     text = None
@@ -223,18 +277,18 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         chat_history[channel].append(
             {'role': 'assistant', 'content': text, 'created_at': datetime.now(), 'thread_ts': thread_ts})
 
-        # Remove the oldest 2 history message if the channel history size is exceeded for the current thread
+        # Remove the oldest 2 history messages if the channel history size is exceeded for the current thread
         if len(list(filter(lambda x: x['thread_ts'] == thread_ts, chat_history[channel]))) >= (history_size + 1) * 2:
             # Create iterator for chat history list
             chat_history_list = (msg for msg in chat_history[channel] if msg['thread_ts'] == thread_ts)
             first_occurance = next(chat_history_list, None)
             second_occurance = next(chat_history_list, None)
 
-            # Remove first occurance
+            # Remove first occurrence
             if first_occurance:
                 chat_history[channel].remove(first_occurance)
 
-            # Remove second occurance
+            # Remove second occurrence
             if second_occurance:
                 chat_history[channel].remove(second_occurance)
 
