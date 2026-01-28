@@ -8,7 +8,7 @@
 
 ## Requirements
 
-* Python >= 3.8.0
+* Python >= 3.11.0
 * Slack App and Bot tokens
 * OpenAI account and valid API key
 
@@ -47,17 +47,19 @@ These are required events for your Slack App:
 
 All configurable environment variables can be found in [.env.example](.env.example) file:
 
-| Variable name      | Description                                                                        | Default value                                              |
-|--------------------|------------------------------------------------------------------------------------|------------------------------------------------------------|
-| *SLACK_BOT_TOKEN   | Slack Bot token used to send messages and listen to events (starts with xoxb-)     | -                                                          |
-| *SLACK_APP_TOKEN   | Slack App token used to interact with your workspace (starts with xapp-)           | -                                                          |
-| *OPENAI_API_KEY    | OpenAI API key used to send request (starts with sk-)                              | -                                                          |
-| GPT_MODEL          | GPT model used for chat completion                                                 | gpt-3.5-turbo                                              |
-| GPT_IMAGE_MODEL    | GPT model used for generating images                                               | dall-e-2                                                   |
-| GPT_IMAGE_SIZE     | The generated image size (256x256, 512x512, 1024x1024, 1792x1024 or 1024x1792)     | 1024x1024                                                  |
-| GPT_SYSTEM_DESC    | The description for the system on how to best tailor answers (disable with "None") | You are a very direct and straight-to-the-point assistant. |
-| HISTORY_EXPIRES_IN | Number of seconds to keep message history for the same channel as a context        | 900                                                        |
-| HISTORY_SIZE       | Number of last messages to keep in history as a context for the next question      | 3                                                          |
+| Variable name        | Description                                                                        | Default value                                              |
+|----------------------|------------------------------------------------------------------------------------|------------------------------------------------------------|
+| *SLACK_BOT_TOKEN     | Slack Bot token used to send messages and listen to events (starts with xoxb-)     | -                                                          |
+| *SLACK_APP_TOKEN     | Slack App token used to interact with your workspace (starts with xapp-)           | -                                                          |
+| *OPENAI_API_KEY      | OpenAI API key used to send request (starts with sk-)                              | -                                                          |
+| GPT_MODEL            | GPT model used for chat completion                                                 | gpt-5.1                                                    |
+| GPT_IMAGE_MODEL      | GPT model used for generating images                                               | dall-e-3                                                   |
+| GPT_IMAGE_SIZE       | The generated image size (256x256, 512x512, 1024x1024, 1792x1024 or 1024x1792)     | 1024x1024                                                  |
+| GPT_SYSTEM_DESC      | The description for the system on how to best tailor answers (disable with "None") | You are a very direct and straight-to-the-point assistant. |
+| GPT_REASONING_EFFORT | Reasoning effort for O-series models (low, medium, high)                           | low                                                        |
+| GPT_TEMPERATURE      | Sampling temperature to use, between 0 and 2                                       | 1                                                          |
+| HISTORY_EXPIRES_IN   | Number of seconds to keep message history for the same channel as a context        | 900                                                        |
+| HISTORY_SIZE         | Number of last messages to keep in history as a context for the next question      | 3                                                          |
 
 _Image model dall-e-2 requires image size less than or equal to 1024x1024, dall-e-3 requires greater than or equal to
 1024x1024_

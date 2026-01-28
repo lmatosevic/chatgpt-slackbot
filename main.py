@@ -5,9 +5,8 @@ from datetime import datetime, timedelta
 from typing import Optional
 from urllib.request import urlopen
 
-import openai
 from dotenv import load_dotenv
-from openai import InvalidRequestError
+from openai import OpenAI, OpenAIError
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
@@ -70,12 +69,14 @@ OPENAI_API_KEY = get_env('OPENAI_API_KEY', None)
 
 # Event API, Web API and OpenAI API
 app = App(token=SLACK_BOT_TOKEN)
-client = WebClient(SLACK_BOT_TOKEN)
-openai.api_key = OPENAI_API_KEY
+slack_client = WebClient(SLACK_BOT_TOKEN)
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 # ChatGPT configuration
-model = get_env('GPT_MODEL', 'gpt-3.5-turbo')
-image_model = get_env('GPT_IMAGE_MODEL', 'dall-e-2')
+model = get_env('GPT_MODEL', 'gpt-5.1')
+reasoning_effort = get_env('GPT_REASONING_EFFORT', 'low')
+temperature = float(get_env('GPT_TEMPERATURE', '1.0'))
+image_model = get_env('GPT_IMAGE_MODEL', 'dall-e-3')
 system_desc = get_env('GPT_SYSTEM_DESC', 'You are a very direct and straight-to-the-point assistant.')
 image_size = get_env('GPT_IMAGE_SIZE', '1024x1024')
 
@@ -144,13 +145,13 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
 
     # Let the user know that we are busy with the request if enough time has passed since last message
     if last_request_datetime[channel] + timedelta(seconds=history_expires_seconds) < datetime.now():
-        client.chat_postMessage(channel=channel,
-                                thread_ts=thread_ts,
-                                text=random.choice([
-                                    'Generating... :gear:',
-                                    'Multiplying matrices :abacus:',
-                                    'Beep beep boop :robot_face:'
-                                ]))
+        slack_client.chat_postMessage(channel=channel,
+                                      thread_ts=thread_ts,
+                                      text=random.choice([
+                                          'Generating... :gear:',
+                                          'Multiplying matrices :abacus:',
+                                          'Beep beep boop :robot_face:'
+                                      ]))
 
     # Set current timestamp
     last_request_datetime[channel] = datetime.now()
@@ -158,7 +159,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
     # Read parent message content if called inside thread conversation
     parent_message_text = None
     if thread_ts and not direct_message:
-        conversation = client.conversations_replies(channel=channel, ts=thread_ts)
+        conversation = slack_client.conversations_replies(channel=channel, ts=thread_ts)
         if len(conversation['messages']) > 0 and valid_input(conversation['messages'][0]['text']):
             parent_message_text = conversation['messages'][0]['text']
 
@@ -182,18 +183,18 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         else:
             # Generate image based on prompt text
             try:
-                response = openai.Image.create(model=image_model, prompt=image_prompt, n=1, size=image_size)
-            except InvalidRequestError as e:
+                response = openai_client.images.generate(model=image_model, prompt=image_prompt, n=1, size=image_size)
+            except OpenAIError as e:
                 log(f'ChatGPT image error: {e}', error=True)
-                # Reply with error message
-                client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=str(e))
+                # Reply with an error message
+                slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=str(e))
                 return
 
             image_url = response.data[0].url
 
             if direct_message:
                 # Send image URL as a message
-                client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=image_url)
+                slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=image_url)
                 text = image_url
             else:
                 image_path = None
@@ -206,13 +207,13 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
                     image_name = f"{short_prompt.replace(' ', '_')}.png"
                     image_path = f'./tmp/{image_name}'
 
-                    # Write file in temp directory
+                    # Write a file in the temp directory
                     image_file = open(image_path, 'wb')
                     image_file.write(image_content)
                     image_file.close()
 
-                    # Upload image to Slack and send message with image to channel
-                    upload_response = client.files_upload_v2(
+                    # Upload an image to Slack and send a message with image to channel
+                    upload_response = slack_client.files_upload_v2(
                         channel=channel,
                         thread_ts=thread_ts,
                         title=short_prompt,
@@ -262,11 +263,22 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
 
         # Send request to ChatGPT
         try:
-            response = openai.ChatCompletion.create(model=model, messages=messages)
-        except InvalidRequestError as e:
+            params = {
+                'model': model,
+                'messages': messages,
+                'temperature': temperature
+            }
+            if 'o1' in model or 'o3' in model:
+                params['reasoning_effort'] = reasoning_effort
+                # O-series models don't support temperature, or it must be 1
+                if 'temperature' in params:
+                    del params['temperature']
+
+            response = openai_client.chat.completions.create(**params)
+        except OpenAIError as e:
             log(f'ChatGPT response error: {e}', error=True)
-            # Reply with error message
-            client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=str(e))
+            # Reply with an error message
+            slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=str(e))
             return
 
         # Prepare response text
@@ -284,16 +296,16 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
             first_occurance = next(chat_history_list, None)
             second_occurance = next(chat_history_list, None)
 
-            # Remove first occurrence
+            # Remove the first occurrence
             if first_occurance:
                 chat_history[channel].remove(first_occurance)
 
-            # Remove second occurrence
+            # Remove the second occurrence
             if second_occurance:
                 chat_history[channel].remove(second_occurance)
 
         # Reply answer to thread
-        client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=text)
+        slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=text)
 
     # Log response text
     log(f'ChatGPT response: {text}')
