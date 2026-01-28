@@ -53,7 +53,7 @@ All configurable environment variables can be found in [.env.example](.env.examp
 | *SLACK_APP_TOKEN     | Slack App token used to interact with your workspace (starts with xapp-)           | -                                                          |
 | *OPENAI_API_KEY      | OpenAI API key used to send request (starts with sk-)                              | -                                                          |
 | GPT_MODEL            | GPT model used for chat completion                                                 | gpt-5.1                                                    |
-| GPT_IMAGE_MODEL      | GPT model used for generating images                                               | dall-e-3                                                   |
+| GPT_IMAGE_MODEL      | GPT model used for generating images                                               | gpt-image-1                                                |
 | GPT_IMAGE_SIZE       | The generated image size (256x256, 512x512, 1024x1024, 1792x1024 or 1024x1792)     | 1024x1024                                                  |
 | GPT_SYSTEM_DESC      | The description for the system on how to best tailor answers (disable with "None") | You are a very direct and straight-to-the-point assistant. |
 | GPT_REASONING_EFFORT | Reasoning effort for O-series models (low, medium, high)                           | low                                                        |

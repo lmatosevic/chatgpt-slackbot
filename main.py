@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import sys
@@ -76,7 +77,7 @@ openai_client = OpenAI(api_key=OPENAI_API_KEY)
 model = get_env('GPT_MODEL', 'gpt-5.1')
 reasoning_effort = get_env('GPT_REASONING_EFFORT', 'low')
 temperature = float(get_env('GPT_TEMPERATURE', '1.0'))
-image_model = get_env('GPT_IMAGE_MODEL', 'dall-e-3')
+image_model = get_env('GPT_IMAGE_MODEL', 'gpt-image-1')
 system_desc = get_env('GPT_SYSTEM_DESC', 'You are a very direct and straight-to-the-point assistant.')
 image_size = get_env('GPT_IMAGE_SIZE', '1024x1024')
 
@@ -120,9 +121,9 @@ def handle_message_events(body):
         body (dict): The event body containing the message information.
     """
     prompt = str(body['event']['text']).strip()
-    user = body['event']['user']
+    channel = body['event']['channel']
     thread_ts = body['event']['thread_ts'] if 'thread_ts' in body['event'] else None
-    handle_prompt(prompt, user, thread_ts, direct_message=True)
+    handle_prompt(prompt, channel, thread_ts, direct_message=True)
 
 
 def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
@@ -180,6 +181,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
 
         if len(image_prompt) == 0:
             text = 'Please check your input. To generate image use this format -> image: robot walking a dog'
+            slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=text)
         else:
             # Generate image based on prompt text
             try:
@@ -190,17 +192,28 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
                 slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=str(e))
                 return
 
+            image_content = None
             image_url = response.data[0].url
 
-            if direct_message:
+            if not image_url:
+                image_base64 = response.data[0].b64_json
+                if not image_base64:
+                    log('ChatGPT image error: Empty URL received', error=True)
+                    slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts,
+                                                  text='ChatGPT returned an empty image URL.')
+                    return
+                image_content = base64.b64decode(image_base64)
+
+            if direct_message and image_url:
                 # Send image URL as a message
                 slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=image_url)
                 text = image_url
             else:
                 image_path = None
                 try:
-                    # Read image from URL
-                    image_content = urlopen(image_url).read()
+                    # Read image from URL if not already returned as byte response
+                    if not image_content:
+                        image_content = urlopen(image_url).read()
 
                     # Prepare image name and path
                     short_prompt = base_image_prompt if valid_input(base_image_prompt) else image_prompt[:30].strip()
@@ -248,7 +261,7 @@ def handle_prompt(prompt, channel, thread_ts=None, direct_message=False):
         # Log used history messages count
         log(f'Using {len(history_messages)} messages from chat history')
 
-        # Append parent text message from current thread
+        # Append a parent text message from the current thread
         if parent_message_text:
             history_messages.append({'role': 'user', 'content': parent_message_text})
             log(f'Adding parent message from thread with timestamp: {thread_ts}')
