@@ -1,4 +1,4 @@
-openai==1.107.0
-python-dotenv==1.1.1
+openai==1.109.1
+python-dotenv==1.2.1
 slack-sdk==3.39.0
 slack-bolt==1.27.0
